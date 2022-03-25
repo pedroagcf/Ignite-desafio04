@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -31,14 +31,65 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
+function handleFormatPosts(responsePosts): PostPagination {
+  const postsArray: Post[] = responsePosts.results.map(post => {
+    return {
+      uid: post.uid,
+      first_publication_date: format(
+        new Date(post.first_publication_date),
+        `d MMM yyyy`,
+        {
+          locale: ptBR,
+        }
+      ),
+      data: {
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author,
+      },
+    };
+  });
+
+  const nextPostsPage: PostPagination = {
+    next_page: responsePosts.next_page ?? '',
+    results: postsArray,
+  };
+
+  return nextPostsPage;
+}
+
 export default function Home({ postsPagination }: HomeProps): JSX.Element {
+  const [posts, setPosts] = useState<PostPagination>();
+
+  async function handlePostPagination(): Promise<void> {
+    const prismic = getPrismicClient();
+    const responsePosts = await prismic.query(
+      [Prismic.Predicates.at('document.type', 'posts')],
+      {
+        fetch: [''],
+        pageSize: 5,
+        page: Number(posts.next_page) + 1,
+      }
+    );
+
+    const nextPostsPage = handleFormatPosts(responsePosts);
+
+    setPosts(nextPostsPage);
+  }
+
+  useEffect(() => {
+    setPosts({
+      ...postsPagination,
+    });
+  }, [posts, postsPagination]);
+
   return (
     <>
       <Head>
         <title>Posts | Space Travelling</title>
       </Head>
       <main className={styles.container}>
-        {postsPagination.results.map(post => (
+        {posts?.results.map(post => (
           <Link key={post.uid} href={`/post/${post.uid}`}>
             <a>
               <strong>{post.data.title}</strong>
@@ -63,7 +114,8 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
         <button
           className={`${styles.loadPosts} ${
             postsPagination.next_page ? styles.isActive : ''
-          } `}
+          }`}
+          onClick={handlePostPagination}
           type="button"
         >
           Carregar mais posts
@@ -83,28 +135,7 @@ export const getStaticProps: GetStaticProps = async () => {
     }
   );
 
-  const postsArray: Post[] = responsePosts.results.map(post => {
-    return {
-      uid: post.uid,
-      first_publication_date: format(
-        new Date(post.first_publication_date),
-        `d MMM yyyy`,
-        {
-          locale: ptBR,
-        }
-      ),
-      data: {
-        title: post.data.title,
-        subtitle: post.data.subtitle,
-        author: post.data.author,
-      },
-    };
-  });
-
-  const postsPagination: PostPagination = {
-    next_page: responsePosts.next_page ?? '',
-    results: postsArray,
-  };
+  const postsPagination = handleFormatPosts(responsePosts);
 
   return {
     props: {

@@ -1,4 +1,7 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
+import { RichText } from 'prismic-dom';
 
 import { getPrismicClient } from '../../services/prismic';
 
@@ -26,20 +29,52 @@ interface PostProps {
   post: Post;
 }
 
-export default function Post(): JSX.Element {
-  return <h1>Post</h1>;
+export default function Post({ post }: PostProps): JSX.Element {
+  return <div>{JSON.stringify(post, null, 2)}</div>;
 }
 
-// export const getStaticPaths = async () => {
-//   const prismic = getPrismicClient();
-//   const posts = await prismic.query(TODO);
+export const getStaticPaths: GetStaticPaths = async () => {
+  // const prismic = getPrismicClient();
+  // const posts = await prismic.query(TODO);
+  // TODO
+  return {
+    paths: [],
+    fallback: 'blocking',
+  };
+};
 
-//   // TODO
-// };
+export const getStaticProps: GetStaticProps = async context => {
+  const { slug } = context.params;
+  const prismic = getPrismicClient();
+  const response = await prismic.getByUID('posts', String(slug), {});
 
-// export const getStaticProps = async context => {
-//   const prismic = getPrismicClient();
-//   const response = await prismic.getByUID(TODO);
+  const post = {
+    first_publication_date: format(
+      new Date(response.first_publication_date),
+      `d MMM yyyy`,
+      {
+        locale: ptBR,
+      }
+    ),
+    data: {
+      title: response.data.title,
+      banner: {
+        url: response.data.banner.url,
+      },
+      author: response.data.author,
+      content: {
+        heading: response.data.content[0].heading,
+        body: {
+          text: response.data.content[0].body[0],
+        },
+      },
+    },
+  };
 
-//   // TODO
-// };
+  return {
+    props: {
+      post,
+    },
+    revalidate: 60 * 30,
+  };
+};

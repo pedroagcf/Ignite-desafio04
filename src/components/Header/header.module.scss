@@ -1,5 +1,10 @@
 .headerContainer {
-  height: 6rem;
+  box-sizing: border-box;
+  padding: {
+    top: 2rem;
+    bottom: 4rem;
+  }
+  // height: 6rem;
 }
 
 .headerContent {
