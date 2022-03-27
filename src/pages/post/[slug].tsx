@@ -3,6 +3,8 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { RichText } from 'prismic-dom';
 
+import Head from 'next/head';
+import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
@@ -30,7 +32,51 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps): JSX.Element {
-  return <div>{JSON.stringify(post, null, 2)}</div>;
+  return (
+    <>
+      <Head>
+        <title>{post.data.title} | Space Travelling</title>
+      </Head>
+      <main className={styles.container}>
+        <article>
+          <figure>
+            <img src={post.data.banner.url} alt="banner" />
+          </figure>
+          <section className={styles.content}>
+            <h1>{post.data.title}</h1>
+            <div className={styles.infoDetails}>
+              <div>
+                <span>
+                  <FiCalendar />
+                </span>
+                <time>{post.first_publication_date}</time>
+              </div>
+              <div>
+                <span>
+                  <FiUser />
+                </span>
+                <p>{post.data.author}</p>
+              </div>
+              <div>
+                <span>
+                  <FiClock />
+                </span>
+                <p>4 min</p>
+              </div>
+            </div>
+            <div
+              className={styles.contentHeading}
+              dangerouslySetInnerHTML={{ __html: post.data.content.heading }}
+            />
+            <div
+              className={styles.contentBody}
+              dangerouslySetInnerHTML={{ __html: post.data.content.body.text }}
+            />
+          </section>
+        </article>
+      </main>
+    </>
+  );
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -64,8 +110,9 @@ export const getStaticProps: GetStaticProps = async context => {
       author: response.data.author,
       content: {
         heading: response.data.content[0].heading,
+        // RichText.asHtml(response.data.content[0].heading),
         body: {
-          text: response.data.content[0].body[0],
+          text: RichText.asHtml(response.data.content[0].body),
         },
       },
     },

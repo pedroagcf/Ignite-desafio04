@@ -1,1 +1,42 @@
-// TODO
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.content {
+  padding-top: 5rem;
+  max-width: 721px;
+  margin: 0 auto;
+
+  h1 {
+    font-weight: 700;
+    line-height: 58px;
+    font-size: 3rem;
+  }
+
+  .infoDetails {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+
+    div {
+      display: flex;
+
+      svg {
+        font-size: 1.25rem;
+        margin-right: 0.5rem;
+      }
+
+      p {
+        display: inline-block;
+        line-height: normal;
+      }
+    }
+  }
+
+  .contentHeading,
+  .contentBody {
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+  }
+}

@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -35,13 +35,7 @@ function handleFormatPosts(responsePosts): PostPagination {
   const postsArray: Post[] = responsePosts.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(
-        new Date(post.first_publication_date),
-        `d MMM yyyy`,
-        {
-          locale: ptBR,
-        }
-      ),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
@@ -51,7 +45,7 @@ function handleFormatPosts(responsePosts): PostPagination {
   });
 
   const nextPostsPage: PostPagination = {
-    next_page: responsePosts.next_page ?? '',
+    next_page: responsePosts.next_page,
     results: postsArray,
   };
 
@@ -59,29 +53,18 @@ function handleFormatPosts(responsePosts): PostPagination {
 }
 
 export default function Home({ postsPagination }: HomeProps): JSX.Element {
-  const [posts, setPosts] = useState<PostPagination>();
+  const [posts, setPosts] = useState<PostPagination>(postsPagination);
 
-  async function handlePostPagination(): Promise<void> {
-    const prismic = getPrismicClient();
-    const responsePosts = await prismic.query(
-      [Prismic.Predicates.at('document.type', 'posts')],
-      {
-        fetch: [''],
-        pageSize: 5,
-        page: Number(posts.next_page) + 1,
-      }
-    );
+  async function handlePostPagination(nextPageURL: string): Promise<void> {
+    const res = await fetch(nextPageURL);
+    const nextPostsPage = await res.json();
+    const postPagination = handleFormatPosts(nextPostsPage);
 
-    const nextPostsPage = handleFormatPosts(responsePosts);
-
-    setPosts(nextPostsPage);
-  }
-
-  useEffect(() => {
     setPosts({
-      ...postsPagination,
+      next_page: postPagination.next_page,
+      results: [...postPagination.results, ...posts.results],
     });
-  }, [posts, postsPagination]);
+  }
 
   return (
     <>
@@ -99,7 +82,15 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
                   <span>
                     <FiCalendar />
                   </span>
-                  <time>{post.first_publication_date}</time>
+                  <time>
+                    {format(
+                      new Date(post.first_publication_date),
+                      `d MMM yyyy`,
+                      {
+                        locale: ptBR,
+                      }
+                    )}
+                  </time>
                 </div>
                 <div>
                   <span>
@@ -111,15 +102,17 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
             </a>
           </Link>
         ))}
-        <button
-          className={`${styles.loadPosts} ${
-            postsPagination.next_page ? styles.isActive : ''
-          }`}
-          onClick={handlePostPagination}
-          type="button"
-        >
-          Carregar mais posts
-        </button>
+        {posts?.next_page !== null && (
+          <button
+            className={`${styles.loadPosts} ${
+              posts?.next_page ? styles.isActive : ''
+            }`}
+            onClick={() => handlePostPagination(posts.next_page)}
+            type="button"
+          >
+            Carregar mais posts
+          </button>
+        )}
       </main>
     </>
   );
@@ -131,7 +124,7 @@ export const getStaticProps: GetStaticProps = async () => {
     [Prismic.Predicates.at('document.type', 'posts')],
     {
       fetch: [''],
-      pageSize: 5,
+      pageSize: 4,
     }
   );
 
