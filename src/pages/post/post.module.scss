@@ -3,7 +3,7 @@
   margin: 0 auto;
 }
 
-.content {
+.post {
   padding-top: 5rem;
   max-width: 721px;
   margin: 0 auto;
@@ -36,7 +36,15 @@
 
   .contentHeading,
   .contentBody {
+    text-align: justify;
     margin-top: 4rem;
     margin-bottom: 4rem;
+
+    p {
+      margin: {
+        top: 1rem;
+        bottom: 1rem;
+      }
+    }
   }
 }

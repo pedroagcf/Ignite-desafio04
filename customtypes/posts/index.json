@@ -7,35 +7,35 @@
     "Main": {
       "uid": {
         "config": {
-          "label": "Slug",
+          "label": "slug",
           "placeholder": ""
         },
         "type": "UID"
       },
       "title": {
         "config": {
-          "label": "Title",
+          "label": "title",
           "placeholder": ""
         },
         "type": "Text"
       },
       "subtitle": {
         "config": {
-          "label": "Subtitle",
+          "label": "subtitle",
           "placeholder": ""
         },
         "type": "Text"
       },
       "author": {
         "config": {
-          "label": "Author",
+          "label": "author",
           "placeholder": ""
         },
         "type": "Text"
       },
       "banner": {
         "config": {
-          "label": "Banner",
+          "label": "banner",
           "constraint": {},
           "thumbnails": []
         },
@@ -43,22 +43,22 @@
       },
       "content": {
         "config": {
-          "label": "Content",
+          "label": "content",
           "placeholder": "",
           "fields": {
             "heading": {
               "config": {
-                "label": "Heading",
+                "label": "heading",
                 "placeholder": ""
               },
               "type": "Text"
             },
             "body": {
               "config": {
-                "label": "Body",
+                "label": "body",
                 "placeholder": "",
                 "allowTargetBlank": true,
-                "multi": "paragraph,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+                "multi": "paragraph,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl,preformatted,heading1,heading2,heading3,heading4,heading5,heading6"
               },
               "type": "StructuredText"
             }

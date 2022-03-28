@@ -130,6 +130,8 @@ export const getStaticProps: GetStaticProps = async () => {
 
   const postsPagination = handleFormatPosts(responsePosts);
 
+  console.log(JSON.stringify(postsPagination, null, 2));
+
   return {
     props: {
       postsPagination,
